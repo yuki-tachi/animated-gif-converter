@@ -1,11 +1,14 @@
-from flaskr import app
+from . import app
 from flask import render_template, request, redirect
 from werkzeug.utils import secure_filename
 import os, subprocess, sys
 
-def allowed_file(filename):
+def allowed_file(filename) -> bool:
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+def get_secure_absolute_path_to_temp(filename: str) -> str:
+    return os.path.join(f'{app.root_path}/temp', secure_filename(filename))
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -26,36 +29,31 @@ def index():
     if not allowed_file(convert_file.filename):
         return redirect(request.url)
     
-    convert_to_path = os.path.join('./flaskr/static/upload', secure_filename(convert_file.filename))
+    convert_to_path = get_secure_absolute_path_to_temp(convert_file.filename)
     convert_file.save(convert_to_path)
-
-    width = request.form.get('width', type=int)
-
-    fps = request.form.get('fps', type=int)
 
     # i - インプットファイル
     # f - フォーマット、mp4とかflvとか
     # y - 強制上書きオプション
     cmd = ['ffmpeg', '-y', '-i', convert_to_path]
 
+    fps = request.form.get('fps', type=int)
     #　フレームレート設定
     if(fps != None and fps > 0):
         cmd.append('-r')
         cmd.append(f'{fps}')
 
+    width = request.form.get('width', type=int)
     if(width != None and fps > 0):
         cmd.append('-vf')
         cmd.append(f'scale={width}:-1')
 
     # 最後に出力先を追加
-    cmd.append(f'./flaskr/static/output/{convert_file.filename}.gif')
+    cmd.append(f'{app.root_path}/static/converted/{convert_file.filename}.gif')
     cp = subprocess.run(cmd)
 
     if cp.returncode != 0:
         print('ls failed.', file=sys.stderr)
         sys.exit(1)
 
-    return render_template('index.html', output=f'static/output/{convert_file.filename}.gif')
-
-if __name__=='__main__':
-    app.run(debug=True)
+    return render_template('index.html', converted=f'static/converted/{convert_file.filename}.gif')

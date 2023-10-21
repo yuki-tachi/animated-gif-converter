@@ -6,4 +6,5 @@ ALLOWED_EXTENSIONS = {'mov', 'avi', 'mp4', 'wmv'}
 app = Flask(__name__, static_folder='./static')
 app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 
+# 循環インポート避け
 import flaskr.main

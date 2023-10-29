@@ -1,7 +1,7 @@
 from . import app
 from flask import render_template, request, redirect
 from werkzeug.utils import secure_filename
-import os, subprocess, sys
+import os, subprocess, sys, base64, re
 
 def allowed_file(filename) -> bool:
     return '.' in filename and \
@@ -56,4 +56,18 @@ def index():
         print('ls failed.', file=sys.stderr)
         sys.exit(1)
 
-    return render_template('index.html', converted=f'static/converted/{convert_file.filename}.gif')
+    uploadimage_base64 = ""
+    with open(f'{app.root_path}/static/converted/{convert_file.filename}.gif',"rb") as imagefile:
+        # bytesファイルのデータをbase64にエンコードする
+        uploadimage_base64 = base64.b64encode(imagefile.read())
+
+    # base64形式のデータを文字列に変換する。その際に、「b'」と「'」の文字列を除去する
+    uploadimage_base64_string = re.sub('b\'|\'', '', str(uploadimage_base64))
+
+    # 「data:image/xxx;base64,xxxxx」の形式にする
+    filebinary = f'data:image/gif;base64,{uploadimage_base64_string}'
+
+    os.remove(convert_to_path)
+    os.remove(f'{app.root_path}/static/converted/{convert_file.filename}.gif')
+    
+    return render_template('index.html', filebinary=filebinary)

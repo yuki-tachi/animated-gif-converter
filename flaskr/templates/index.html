@@ -43,10 +43,10 @@
                     <label for="width_1280">1280px</label>
                 </div>
                 <input type="submit" value="convert" class="btn btn-success">
-                {% if output != "" %}
+                {% if converted != "" %}
                 <hr>
                 <div class="form-group">
-                    <img src="{{ converted }}" alt="converted">
+                    <img src="{{ filebinary }}" alt="converted_base64">
                 </div>
                 {% endif %}
             </form>

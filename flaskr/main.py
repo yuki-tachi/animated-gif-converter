@@ -1,7 +1,8 @@
-from . import app
 from flask import render_template, request, redirect
 from werkzeug.utils import secure_filename
-import os, subprocess, sys, base64, re
+from flaskr import create_app
+
+app = create_app()
 
 def allowed_file(filename) -> bool:
     return '.' in filename and \

@@ -1,8 +1,7 @@
 from flask import render_template, request, redirect
 from werkzeug.utils import secure_filename
 from flaskr import create_app
-
-app = create_app()
+import os, sys, subprocess, base64, re
 
 def allowed_file(filename) -> bool:
     return '.' in filename and \
@@ -11,15 +10,20 @@ def allowed_file(filename) -> bool:
 def get_secure_absolute_path_to_temp(filename: str) -> str:
     return os.path.join(f'{app.root_path}/temp', secure_filename(filename))
 
+app = create_app()
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == 'GET':
-        print('convert get')
-        return render_template('index.html', output="")
-
+   return render_template('index.html')
+ 
+@app.route('/processing', methods=['GET', 'POST'])
+def processing():
+    # if request.method == 'GET':
+    #     print('convert get')
+    #     return render_template('index.html')
     if 'convert_file' not in request.files:
         print("no convert_file part")
-        return redirect(request.url)
+        return render_template('index.html')
     
     convert_file = request.files.get('convert_file')
 

@@ -11,4 +11,3 @@ def create_app():
 
 # 循環インポート避け
 import flaskr.main
-

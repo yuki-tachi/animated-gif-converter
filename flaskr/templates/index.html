@@ -1,74 +1,74 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <h3 class="py-4">animated-gif-converter</h3>
-    <p class="text-secondary">動画ファイルを動画gifに変換する</p>
+<h3 class="py-4">animated-gif-converter</h3>
+<p class="text-secondary">動画ファイルを動画gifに変換する</p>
+<hr>
+<form action="{{ url_for('processing') }}" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label id="drop-area" class="drop-area" for="convert-file">
+            ファイルを選択またはここにドラッグアンドドロップ
+        </label>
+        <input id="convert-file" type="file" name="convert_file" class="form-control-file">
+    </div>
+
+    <div class="form-group">
+        <label>fpsを指定</label><br>
+        <input type="radio" id="fps_auto" name="fps" value="-1">
+        <label for="fps_auto">auto</label>
+        <input type="radio" id="fps_5" name="fps" value="5">
+        <label for="fps_5">5fps</label>
+        <input type="radio" id="fps_10" name="fps" value="10">
+        <label for="fps_10">10fps</label>
+        <input type="radio" id="fps_24" name="fps" value="24" checked>
+        <label for="fps_24">24fps</label>
+        <input type="radio" id="fps_30" name="fps" value="30">
+        <label for="fps_30">30fps</label>
+        <input type="radio" id="fps_60" name="fps" value="60">
+        <label for="fps_60">60fps</label>
+    </div>
+    <div class="form-group">
+        <label>幅を指定</label><br>
+        <input type="radio" id="width_auto" name="width" value="-1">
+        <label for="width_auto">auto</label>
+        <input type="radio" id="width_320" name="width" value="320" checked>
+        <label for="width_320">320px</label>
+        <input type="radio" id="width_540" name="width" value="540">
+        <label for="width_540">540px</label>
+        <input type="radio" id="width_640" name="width" value="640">
+        <label for="width_640">640px</label>
+        <input type="radio" id="width_1280" name="width" value="1280">
+        <label for="width_1280">1280px</label>
+    </div>
+    <input type="submit" value="convert" class="btn btn-success">
+
+    {% if filebinary %}
     <hr>
-    <form action="{{ url_for('processing') }}" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label id="drop-area" class="drop-area" for="convert-file">
-                ファイルを選択またはここにドラッグアンドドロップ
-            </label>
-            <input id="convert-file" type="file" name="convert_file" class="form-control-file">
-        </div>
-        
-        <div class="form-group">
-            <label>fpsを指定</label><br>
-            <input type="radio" id="fps_auto" name="fps" value="-1">
-            <label for="fps_auto">auto</label>
-            <input type="radio" id="fps_5" name="fps" value="5">
-            <label for="fps_5">5fps</label>
-            <input type="radio" id="fps_10" name="fps" value="10">
-            <label for="fps_10">10fps</label>
-            <input type="radio" id="fps_24" name="fps" value="24" checked>
-            <label for="fps_24">24fps</label>
-            <input type="radio" id="fps_30" name="fps" value="30">
-            <label for="fps_30">30fps</label>
-            <input type="radio" id="fps_60" name="fps" value="60">
-            <label for="fps_60">60fps</label>
-        </div>
-        <div class="form-group">
-            <label>幅を指定</label><br>
-            <input type="radio" id="width_auto" name="width" value="-1">
-            <label for="width_auto">auto</label>
-            <input type="radio" id="width_320" name="width" value="320" checked>
-            <label for="width_320">320px</label>
-            <input type="radio" id="width_540" name="width" value="540">
-            <label for="width_540">540px</label>
-            <input type="radio" id="width_640" name="width" value="640">
-            <label for="width_640">640px</label>
-            <input type="radio" id="width_1280" name="width" value="1280">
-            <label for="width_1280">1280px</label>
-        </div>
-        <input type="submit" value="convert" class="btn btn-success">
+    <p>result</p>
+    <div class="form-group">
+        <img src="{{ filebinary }}" alt="converted_base64">
+    </div>
+    {% endif %}
+</form>
 
-        {% if filebinary %}
-            <hr>
-            <p>result</p>
-            <div class="form-group">
-                <img src="{{ filebinary }}" alt="converted_base64">
-            </div>
-        {% endif %}
-    </form>
+<script>
+    const dropArea = document.getElementById("drop-area");
+    const convertFile = document.getElementById("convert-file");
+    const dt = new DataTransfer();
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        console.log("drop over")
+        dropArea.classList.add('over');
+    });
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
 
-    <script>
-        const dropArea = document.getElementById("drop-area");
-        const convertFile = document.getElementById("convert-file");
-        const dt = new DataTransfer();
-        dropArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            console.log("drop over")
-            dropArea.classList.add('over');
-        });
-        dropArea.addEventListener('drop', (e) => {
-            e.preventDefault();
+        dt.items.remove(0);
+        dt.items.add(e.dataTransfer.files[0]);
+        convertFile.files = dt.files;
+    });
 
-            dt.items.remove(0);
-            dt.items.add(e.dataTransfer.files[0]);
-            convertFile.files = dt.files;
-        });
-
-        dropArea.addEventListener('dragleave', () => {
-            dropArea.classList.remove('over');
-        });
-    </script>
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('over');
+    });
+</script>
 {% endblock %}

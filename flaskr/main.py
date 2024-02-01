@@ -1,6 +1,5 @@
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, Flask
 from werkzeug.utils import secure_filename
-from flaskr import create_app
 import os, sys, subprocess, base64, re
 
 def allowed_file(filename) -> bool:
@@ -10,6 +9,14 @@ def allowed_file(filename) -> bool:
 def get_secure_absolute_path_to_temp(filename: str) -> str:
     return os.path.join(f'{app.root_path}/temp', secure_filename(filename))
 
+def create_app():
+    ALLOWED_EXTENSIONS = {'mov', 'avi', 'mp4', 'wmv'}
+
+    app = Flask(__name__, static_folder='./static')
+    app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
+
+    return app
+
 app = create_app()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -18,9 +25,6 @@ def index():
  
 @app.route('/processing', methods=['GET', 'POST'])
 def processing():
-    # if request.method == 'GET':
-    #     print('convert get')
-    #     return render_template('index.html')
     if 'convert_file' not in request.files:
         print("no convert_file part")
         return render_template('index.html')

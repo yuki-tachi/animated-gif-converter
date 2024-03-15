@@ -1,0 +1,19 @@
+services:
+  web:
+    build: .
+    container_name: web
+    environment:
+      FLASK_ENV: development
+    ports:
+      - "5001:5000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $PWD:/usr/src/app
+  ffmpeg:
+    container_name:  ffmpeg
+    image: jrottenberg/ffmpeg:4.4-alpine
+    platform: linux/amd64
+    tty: true
+    entrypoint: "ash"
+    volumes:
+      - $PWD/flaskr:/flaskr

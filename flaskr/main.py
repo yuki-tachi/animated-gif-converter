@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, Flask, url_for
 from werkzeug.utils import secure_filename
 import math, os, sys, subprocess, base64, re, uuid
 
-def allowed_file(filename) -> bool:
+def allowed_file(filename: str) -> bool:
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
@@ -37,16 +37,19 @@ def get_base64() -> str:
 
 app = create_app()
 
-@app.route('/', methods=['GET', 'POST'])
-def index(filebinary=None, base_size=0, converted_size=0):
-   print(os.getcwd())
-   if filebinary is None:
-       return render_template('index.html')
-   return render_template('index.html', filebinary, base_size, converted_size)
+@app.route('/redirect/')
+def redirect_example():
+    # url_for で index() に紐付いた URL を生成
+    # 生成された URL にリダイレクト
+    app = {'file_name': 'static/converted/3c1cc385-bb67-4032-af26-dc57c2a38309.gif'}
+    return redirect(url_for('index', app=app)) 
 
-@app.route('/process', methods=['GET', 'POST'])
-def process():
-    return render_template('processing.html')
+@app.route('/', methods=['GET', 'POST'])
+def index(app:dict[str, any] = None):
+    print(os.getcwd())
+
+    return render_template('index.html', app=app)
+
 
 @app.route('/processing', methods=['GET', 'POST'])
 def processing():
@@ -82,8 +85,9 @@ def processing():
         cmd.append('-vf')
         cmd.append(f'scale={width}:-1')
 
+    file_name = uuid.uuid4()
     # 最後に出力先を追加
-    cmd.append(f'./flaskr/static/converted/output.gif')
+    cmd.append(f'./flaskr/static/converted/{file_name}.gif')
     cp = subprocess.run(cmd)
 
     if cp.returncode != 0:
@@ -92,11 +96,18 @@ def processing():
 
 
     base_size=os.path.getsize(convert_to_path)
-    converted_size=os.path.getsize('./flaskr/static/converted/output.gif')
+    converted_size=os.path.getsize(f'./flaskr/static/converted/{file_name}.gif')
 
-    filebinary = get_base64()
+    # filebinary = get_base64()
+    # os.remove(convert_to_path)
+    # os.remove(f'./flaskr/static/converted/output.gif')
+    app = {
+        'file_name': f'static/converted/{str(file_name)}.gif',
+        'base_size_formatted': convert_size_format(base_size),
+        'converted_size_formatted': convert_size_format(converted_size),
+        'fps': fps,
+        'width': width,
+    }
 
-    os.remove(convert_to_path)
-    os.remove(f'./flaskr/static/converted/output.gif')
-
-    return render_template('index.html', filebinary=filebinary, base_size=convert_size_format(base_size), converted_size=convert_size_format(converted_size))
+    return render_template('index.html', app = app)
+    # return url_for('index', app = app)

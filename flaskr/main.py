@@ -34,19 +34,11 @@ def get_base64() -> str:
 
 app = create_app()
 
-@app.route('/redirect/')
-def redirect_example():
-    # url_for で index() に紐付いた URL を生成
-    # 生成された URL にリダイレクト
-    app = {'file_name': 'static/converted/3c1cc385-bb67-4032-af26-dc57c2a38309.gif'}
-    return redirect(url_for('index', app=app)) 
-
 @app.route('/', methods=['GET', 'POST'])
 def index(app:dict[str, any] = None):
     print(os.getcwd())
 
     return render_template('index.html', app=app)
-
 
 @app.route('/processing', methods=['GET', 'POST'])
 def processing():
@@ -82,9 +74,10 @@ def processing():
         cmd.append('-vf')
         cmd.append(f'scale={width}:-1')
 
-    file_name = uuid.uuid4()
+    file_name = str(uuid.uuid4())
+    convert_to_path = f'./flaskr/static/converted/{file_name}.gif'
     # 最後に出力先を追加
-    cmd.append(f'./flaskr/static/converted/{file_name}.gif')
+    cmd.append(convert_to_path)
     cp = subprocess.run(cmd)
 
     if cp.returncode != 0:
@@ -92,16 +85,13 @@ def processing():
         sys.exit(1)
 
 
-    base_size=os.path.getsize(convert_to_temp_path)
-    converted_size=os.path.getsize(f'./flaskr/static/converted/{file_name}.gif')
-
     # filebinary = get_base64()
     # os.remove(convert_to_temp_path)
     # os.remove(f'./flaskr/static/converted/output.gif')
     app = {
-        'file_name': f'static/converted/{str(file_name)}.gif',
-        'base_size_formatted': convert_size_format(base_size),
-        'converted_size_formatted': convert_size_format(converted_size),
+        'file_name': f'static/converted/{file_name}.gif',
+        'base_size_formatted': convert_size_format(os.path.getsize(convert_to_temp_path)),
+        'converted_size_formatted': convert_size_format(os.path.getsize(convert_to_path)),
         'fps': fps,
         'width': width,
     }

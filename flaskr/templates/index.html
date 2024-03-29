@@ -3,7 +3,7 @@
 <h3 class="py-4">animated-gif-converter</h3>
 <p class="text-secondary">動画ファイルを動画gifに変換する</p>
 <hr>
-<form action="{{ url_for('processing') }}" method="post" enctype="multipart/form-data">
+<form id="form" action="{{ url_for('processing') }}" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label id="drop-area" class="drop-area" for="convert-file">
             ファイルを選択またはここにドラッグアンドドロップ
@@ -39,18 +39,27 @@
         <input type="radio" id="width_1280" name="width" value="1280">
         <label for="width_1280">1280px</label>
     </div>
-    <input type="submit" value="convert" class="btn btn-success">
+    <input id="convert_btn" type="submit" value="convert" class="btn btn-success">
+    <img id="spinner" style="display: none;" src="static/img/spinner.svg" alt="">
 
-    {% if filebinary %}
+    {% if app %}
     <hr>
-    <p>result</p>
+    <p>base_size: {{app['base_size_formatted'] }} -> compressed_size: {{app['converted_size_formatted']}}</p>
+    <p>width: {{app['width']}}px fps: {{app['fps']}}</p>
+
     <div class="form-group">
-        <img src="{{ filebinary }}" alt="converted_base64">
+        <img src="{{app['file_name']}}" alt="converted_img">
     </div>
     {% endif %}
 </form>
 
 <script>
+    document.getElementById("form").addEventListener('submit', (event) => {
+        console.log("submit");
+        document.getElementById("convert_btn").disabled = true;
+        document.getElementById("spinner").style.display = 'inline-block';
+    });
+
     const dropArea = document.getElementById("drop-area");
     const convertFile = document.getElementById("convert-file");
     const dt = new DataTransfer();

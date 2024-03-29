@@ -6,9 +6,6 @@ def allowed_file(filename: str) -> bool:
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-def get_secure_absolute_path_to_temp(filename: str) -> str:
-    return os.path.join(f'./flaskr/temp', secure_filename(filename))
-
 def convert_size_format(size: int) -> str:
     units = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB")
     i = math.floor(math.log(size, 1024)) if size > 0 else 0
@@ -66,13 +63,13 @@ def processing():
     if not allowed_file(convert_file.filename):
         return redirect(request.url)
     
-    convert_to_path = get_secure_absolute_path_to_temp(convert_file.filename)
-    convert_file.save(convert_to_path)
+    convert_to_temp_path = os.path.join(f'./flaskr/temp', secure_filename(convert_file.filename))
+    convert_file.save(convert_to_temp_path)
 
     # i - インプットファイル
     # f - フォーマット、mp4とかflvとか
     # y - 強制上書きオプション
-    cmd = ['docker', 'exec', 'ffmpeg', 'ffmpeg', '-y', '-i', convert_to_path]
+    cmd = ['docker', 'exec', 'ffmpeg', 'ffmpeg', '-y', '-i', convert_to_temp_path]
 
     fps = request.form.get('fps', type=int)
     #　フレームレート設定
@@ -95,11 +92,11 @@ def processing():
         sys.exit(1)
 
 
-    base_size=os.path.getsize(convert_to_path)
+    base_size=os.path.getsize(convert_to_temp_path)
     converted_size=os.path.getsize(f'./flaskr/static/converted/{file_name}.gif')
 
     # filebinary = get_base64()
-    # os.remove(convert_to_path)
+    # os.remove(convert_to_temp_path)
     # os.remove(f'./flaskr/static/converted/output.gif')
     app = {
         'file_name': f'static/converted/{str(file_name)}.gif',

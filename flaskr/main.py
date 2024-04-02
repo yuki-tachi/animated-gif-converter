@@ -17,7 +17,6 @@ def create_app():
     ALLOWED_EXTENSIONS = {'mov', 'avi', 'mp4', 'wmv'}
     
     app = Flask(__name__, static_folder='./static')
-    print(app.root_path)
     app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
     return app
 
@@ -36,7 +35,6 @@ app = create_app()
 
 @app.route('/', methods=['GET', 'POST'])
 def index(app:dict[str, any] = None):
-    print(os.getcwd())
 
     return render_template('index.html', app=app)
 
@@ -97,4 +95,3 @@ def processing():
     }
 
     return render_template('index.html', app = app)
-    # return url_for('index', app = app)

@@ -53,9 +53,9 @@ def processing():
     if not allowed_file(convert_file.filename):
         return redirect(request.url)
     
-    convert_to_temp_path = os.path.join(f'./flaskr/temp', secure_filename(convert_file.filename))
-    convert_file.save(convert_to_temp_path)
+    convert_to_temp_path = os.path.join(f'./temp', secure_filename(convert_file.filename))
 
+    convert_file.save(convert_to_temp_path)
     # i - インプットファイル
     # f - フォーマット、mp4とかflvとか
     # y - 強制上書きオプション
@@ -73,7 +73,7 @@ def processing():
         cmd.append(f'scale={width}:-1')
 
     file_name = str(uuid.uuid4())
-    convert_to_path = f'./flaskr/static/converted/{file_name}.gif'
+    convert_to_path = f'./static/converted/{file_name}.gif'
     # 最後に出力先を追加
     cmd.append(convert_to_path)
     cp = subprocess.run(cmd)

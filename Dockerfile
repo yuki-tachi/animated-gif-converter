@@ -17,9 +17,10 @@ RUN apt -y install docker-ce-cli docker-compose-plugin
 WORKDIR /usr/src/app
 COPY requirements.txt ./
 
-ENV FLASK_APP=./flaskr/main
+# ENV FLASK_APP=./flaskr/main
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD [ "gunicorn", "-w", "4", "--chdir", "./flaskr", "-b", "0.0.0.0:5000", "main:app" ]
+# CMD ["flask", "run", "--host=0.0.0.0"]

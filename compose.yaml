@@ -10,10 +10,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - $PWD:/usr/src/app
   ffmpeg:
-    container_name:  ffmpeg
+    container_name: ffmpeg
     image: jrottenberg/ffmpeg:4.4-alpine
     platform: linux/amd64
     tty: true
+    working_dir: /flaskr
     entrypoint: "ash"
     volumes:
       - $PWD/flaskr:/flaskr

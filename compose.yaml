@@ -1,7 +1,7 @@
 services:
-  web:
+  app-server:
     build: .
-    container_name: web
+    container_name: app-server
     environment:
       FLASK_ENV: development
     ports:
@@ -9,6 +9,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - $PWD:/usr/src/app
+    networks:                   # このサービスが属するネットワークの設定
+      my_host_network:        # 後述のmy_host_networkに属する
+        aliases:
+          - uwsgi-server  # my_host_network上ではこの名前で判別できるようになる
   ffmpeg:
     container_name: ffmpeg
     image: jrottenberg/ffmpeg:4.4-alpine
@@ -18,3 +22,21 @@ services:
     entrypoint: "ash"
     volumes:
       - $PWD/flaskr:/flaskr
+  web-server:
+      container_name: web-server
+      build:
+          context: ./nginx
+          dockerfile: Dockerfile
+      networks:
+          my_host_network:
+              aliases:
+                  - web-server
+      ports:
+          - 80:9123     # ホストPCの9090番をコンテナの9123番にポートフォワーディング
+      depends_on:         # 依存関係を指定。web-serverの起動より前にapp-serverを起動するようになる
+          - app-server
+      restart: always
+networks:
+  my_host_network:            # 上の方のサーバ設定で使うときのエイリアス名
+      name: my-nginx-network  # ネットワークの名前
+      driver: bridge          # ドライバ種別、bridgeかoverlay
